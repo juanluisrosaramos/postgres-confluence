@@ -1,5 +1,5 @@
-# Using Persistent Disks with WordPress and MySQL
+# Deploying in Kubernetes a Confluence with Postgres instance
 
-Follow this tutorial at https://cloud.google.com/kubernetes-engine/docs/tutorials/persistent-disk/
+Following this tutorial at https://cloud.google.com/kubernetes-engine/docs/tutorials/persistent-disk/
 
 
