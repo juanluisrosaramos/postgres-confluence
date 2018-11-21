@@ -1,31 +1,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
+  name: postgresql
   labels:
-    app: postgres
+    app: postgresql
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: postgresql
   template:
     metadata:
       labels:
-        app: postgres
+        app: postgresql
     spec:
       containers:
         - image: postgres:10.1
-          name: postgres
-          env:
-            - name: MYSQL_ROOT_PASSWORD
+	  name: postgresql
+	  env:
+	    -name: POSTGRES_USER
+	     valueFrom: 
+		secretKeyRef:
+		  name:postgres
+		  key:username		  
+            -name:POSTGRES_DB
+             valueFrom:  
+                secretKeyRef:
+                  name:postgres
+                  key:dbname	
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres
                   key: password
           ports:
             - containerPort: 5432
-              name: postgres
+              name: postgresql
           volumeMounts:
             - name: postgres-persistent-storage
               mountPath: /var/lib/postgresql/data
