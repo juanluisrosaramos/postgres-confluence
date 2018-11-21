@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confluence
+  labels:
+    app: confluence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confluence
+  template:
+    metadata:
+      labels:
+        app: confluence
+    spec:
+      containers:
+        - image: us.gcr.io/juanluis-personal/confluence
+          name: confluence
+	  env:
+          - name: WORDPRESS_DB_HOST
+            value: mysql:3306
+          - name: WORDPRESS_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql
+                key: password
+          ports:
+            - containerPort: 8090
+              name: confluence
+          volumeMounts:
+            - name: confluence-persistent-storage
+              mountPath: /var/atlassian/application-data/confluence
+      volumes:
+        - name: confluence-persistent-storage
+          persistentVolumeClaim:
+            claimName: confluence-volumeclaim
