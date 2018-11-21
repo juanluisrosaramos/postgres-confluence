@@ -17,17 +17,11 @@ spec:
       containers:
         - image: us.gcr.io/juanluis-personal/confluence
           name: confluence
-	  env:
-          - name: WORDPRESS_DB_HOST
-            value: mysql:3306
-          - name: WORDPRESS_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: mysql
-                key: password
           ports:
             - containerPort: 8090
               name: confluence
+            - containerPort: 8091
+              name: synchrony
           volumeMounts:
             - name: confluence-persistent-storage
               mountPath: /var/atlassian/application-data/confluence

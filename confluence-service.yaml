@@ -10,5 +10,10 @@ spec:
     - port: 80
       targetPort: 8090
       protocol: TCP
+      name: confluence
+    - port: 8091
+      targetPort: 8091
+      protocol: TCP
+      name: sinchrony
   selector:
     app: confluence
