@@ -27,5 +27,7 @@ spec:
               mountPath: /var/atlassian/application-data/confluence
       volumes:
         - name: confluence-persistent-storage
-          persistentVolumeClaim:
-            claimName: confluence-volumeclaim
+          #persistentVolumeClaim:
+           # claimName: confluence-volumeclaim
+          gcePersistentDisk:
+            pdName: confluence-europe
