@@ -1,0 +1,133 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+        - image: postgres:10.1
+          name: postgresql
+          env:
+             - name: POSTGRES_USER
+               valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: username
+             - name: PGUSER
+               valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: username
+             - name: PGDATA
+               value: /var/lib/postgresql/data/pgdata
+             - name: POSTGRES_DB
+               valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: dbname
+             - name: POSTGRES_PASSWORD
+               valueFrom:
+                secretKeyRef:
+                  name: postgres
+                  key: password
+          ports:
+            - containerPort: 5432
+              name: postgresql
+          volumeMounts:
+            - name: postgres-persistent-storage
+              mountPath: /var/lib/postgresql/data
+      volumes:
+        - name: postgres-persistent-storage
+          gcePersistentDisk:
+            pdName: postgres-conflu-europe
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+  selector:
+    app: postgresql
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confluence
+  labels:
+    app: confluence
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confluence
+  template:
+    metadata:
+      labels:
+        app: confluence
+    spec:
+      containers:
+        - image: us.gcr.io/juanluis-personal/confluence
+          name: confluence
+          ports:
+            - containerPort: 8090
+              name: confluence
+            - containerPort: 8091
+              name: synchrony
+          volumeMounts:
+            - name: confluence-persistent-storage
+              mountPath: /var/atlassian/application-data/confluence
+      volumes:
+        - name: confluence-persistent-storage
+          #persistentVolumeClaim:
+           # claimName: confluence-volumeclaim
+          gcePersistentDisk:
+            pdName: confluence-europe
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: confluence
+  name: confluence
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8090
+      protocol: TCP
+      name: confluence
+  selector:
+    app: confluence
+# ---
+# apiVersion: "autoscaling/v1"
+# kind: "HorizontalPodAutoscaler"
+# metadata:
+#   name: "confluence-postgres-hpa"
+#   namespace: "default"
+#   labels:
+#     app: "confluence-postgres"
+# spec:
+#   scaleTargetRef:
+#     kind: "Deployment"
+#     name: "confluence-postgres"
+#     apiVersion: "apps/v1beta1"
+#   minReplicas: 1
+#   maxReplicas: 3
+#   targetCPUUtilizationPercentage: 80
+
